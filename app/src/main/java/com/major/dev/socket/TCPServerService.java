@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.IBinder;
 
 import com.major.dev.MyUtils;
+import com.major.dev.SL;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -33,6 +34,14 @@ public class TCPServerService extends Service{
     }
 
     @Override
+    public void onDestroy() {
+
+        mIsServiceDestroyed = true;
+        SL.i("stop server");
+        super.onDestroy();
+    }
+
+    @Override
     public IBinder onBind(Intent intent){
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
@@ -47,14 +56,14 @@ public class TCPServerService extends Service{
                 serverSocket = new ServerSocket(8688);
             } catch(IOException e){
                 e.printStackTrace();
-                System.out.println("establish tcp server failed, port:8688");
+                SL.i("establish tcp server failed, port:8688");
                 return;
             }
 
             while(!mIsServiceDestroyed){
                 try{
                     final Socket client = serverSocket.accept();
-                    System.out.println("accept");
+                    SL.i("accept");
                     new Thread(){
                         @Override
                         public void run(){
@@ -78,7 +87,7 @@ public class TCPServerService extends Service{
         out.println("欢迎来到聊天室！");
         while(!mIsServiceDestroyed){
             String str = in.readLine();
-            System.out.println("msg from client: " + str);
+            SL.i("msg from client: " + str);
             if(str == null){
                 // 客户端断开连接
                 break;
@@ -87,10 +96,10 @@ public class TCPServerService extends Service{
             int i = new Random().nextInt(mDefinedMessages.length);
             String msg = mDefinedMessages[i];
             out.println(msg);
-            System.out.println("send: " + msg);
+            SL.i("send: " + msg);
 
         }
-        System.out.println("client quit.");
+        SL.i("client quit.");
         MyUtils.close(out);
         MyUtils.close(in);
         client.close();
